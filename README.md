@@ -378,13 +378,26 @@ docker-compose down
 
 ### Production Considerations
 
-- Set strong `JWT_SECRET` in environment variables
-- Use environment variables for MongoDB connection string
-- Enable HTTPS
-- Configure proper CORS settings
-- Set up monitoring and logging
-- Regular backups of MongoDB data
-- Use Docker for consistent deployments
+**⚠️ Security Warning:** Before deploying to production:
+
+1. **Environment Variables**: Create a `.env` file from `.env.example` and set secure values:
+   - Set a strong `JWT_SECRET` (use a random string generator)
+   - Use environment variables for MongoDB connection string (never commit credentials)
+   - Keep `.env` file out of version control (already in `.gitignore`)
+
+2. **Security Best Practices**:
+   - Enable HTTPS/TLS
+   - Configure proper CORS settings (restrict allowed origins)
+   - Set up rate limiting
+   - Implement request validation
+   - Regular security audits
+
+3. **Infrastructure**:
+   - Set up monitoring and logging
+   - Regular backups of MongoDB data
+   - Use Docker for consistent deployments
+   - Configure reverse proxy (nginx/Apache)
+   - Set up CI/CD pipelines
 
 ## Future Enhancements
 - Email notifications for seminars
