@@ -93,6 +93,39 @@ LMS/
 - Node.js (v14 or higher)
 - npm or yarn
 - MongoDB Atlas account (connection string provided)
+- Docker and Docker Compose (optional, for containerized deployment)
+
+### Quick Start
+
+#### Option 1: Automated Setup (Recommended)
+
+**For Windows:**
+```powershell
+.\setup.ps1
+```
+
+**For Unix/Linux/macOS:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The automated setup will:
+- Install all dependencies
+- Create an admin user
+- Provide instructions to start the application
+
+#### Option 2: Docker Deployment
+
+```bash
+docker-compose up -d
+```
+
+This will start both backend and frontend in containers.
+
+#### Option 3: Manual Setup
+
+#### Option 3: Manual Setup
 
 ### Backend Setup
 
@@ -261,7 +294,24 @@ Two separate tables:
 ## Default Setup
 
 ### Creating an Admin User
-To create an admin user, you'll need to manually insert a document into the MongoDB database with role 'admin'. You can use MongoDB Compass or the MongoDB shell.
+
+The automated setup scripts will create an admin user for you using the `createAdmin.js` script.
+
+**Default Admin Credentials:**
+- Username: `admin`
+- Password: `admin123`
+- Email: `admin@lms.com`
+
+**Manual Admin Creation:**
+If you need to manually create an admin user, you can either:
+
+1. Run the admin creation script:
+```bash
+cd backend
+node createAdmin.js
+```
+
+2. Or manually insert a document into the MongoDB database with role 'admin'. You can use MongoDB Compass or the MongoDB shell.
 
 Example admin user:
 ```javascript
@@ -286,6 +336,56 @@ Example admin user:
 - Backend is configured to accept requests from all origins
 - Modify in `server.js` for production
 
+## Documentation
+
+This project includes comprehensive documentation:
+
+- **[README.md](README.md)** - Main project documentation (this file)
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick start guide for getting up and running
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - System architecture and testing guide
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guidelines for contributing to the project
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community guidelines and code of conduct
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+- **[LICENSE](LICENSE)** - MIT License with educational use note
+
+## Contributing
+
+We welcome contributions! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for details on:
+- Development workflow
+- Code style guidelines
+- Pull request process
+- Testing requirements
+- Security considerations
+
+Please also review our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+## Deployment
+
+### Docker Deployment
+
+The project includes Docker support for easy deployment:
+
+```bash
+# Build and start containers
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+```
+
+### Production Considerations
+
+- Set strong `JWT_SECRET` in environment variables
+- Use environment variables for MongoDB connection string
+- Enable HTTPS
+- Configure proper CORS settings
+- Set up monitoring and logging
+- Regular backups of MongoDB data
+- Use Docker for consistent deployments
+
 ## Future Enhancements
 - Email notifications for seminars
 - Attendance reports and analytics
@@ -297,10 +397,13 @@ Example admin user:
 - Export data to Excel/PDF
 
 ## Support
-For issues or questions, please contact the development team.
+For issues or questions, please:
+- Check existing documentation
+- Search existing issues on GitHub
+- Create a new issue with detailed information
+- Contact the development team
 
 ## License
-Private - Educational Use Only
-#   L M S  
- #   L M S  
- 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Educational Use Note:** This software is primarily intended for educational purposes.
