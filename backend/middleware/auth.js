@@ -48,4 +48,12 @@ const isStudent = (req, res, next) => {
   next();
 };
 
-module.exports = { auth, isAdmin, isInstructor, isStudent };
+// Check if user is super admin
+const isSuperAdmin = (req, res, next) => {
+  if (!req.user.isSuperAdmin) {
+    return res.status(403).json({ message: 'Access denied. Super Admin only.' });
+  }
+  next();
+};
+
+module.exports = { auth, isAdmin, isInstructor, isStudent, isSuperAdmin };

@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'instructor', 'student'],
     required: true
   },
+  isSuperAdmin: {
+    type: Boolean,
+    default: false
+  },
   // For Instructor
   instructor_id: {
     type: String,

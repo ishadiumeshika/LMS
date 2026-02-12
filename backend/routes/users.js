@@ -111,4 +111,17 @@ router.get('/instructors/all', auth, isAdmin, async (req, res) => {
   }
 });
 
+// Get all admins (Admin only)
+router.get('/admins/all', auth, isAdmin, async (req, res) => {
+  try {
+    const admins = await User.find({ role: 'admin' })
+      .select('-password')
+      .sort({ createdAt: -1 });
+    
+    res.json(admins);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

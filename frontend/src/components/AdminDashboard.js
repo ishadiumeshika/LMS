@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
+import { useAuth } from '../context/AuthContext';
 import { 
   usersAPI, 
   centersAPI, 
   seminarsAPI, 
-  attendanceAPI 
+  attendanceAPI,
+  authAPI
 } from '../services/api';
 
 const AdminDashboard = () => {
+  const { isSuperAdmin } = useAuth();
   const [stats, setStats] = useState({
     students: 0,
     instructors: 0,
+    admins: 0,
     centers: 0,
     seminars: 0
   });
@@ -18,6 +22,7 @@ const AdminDashboard = () => {
   const [data, setData] = useState({
     students: [],
     instructors: [],
+    admins: [],
     centers: [],
     seminars: [],
     attendance: []
@@ -30,6 +35,7 @@ const AdminDashboard = () => {
   const [showCenterModal, setShowCenterModal] = useState(false);
   const [showSeminarModal, setShowSeminarModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   // Form states
   const [centerForm, setCenterForm] = useState({
@@ -58,6 +64,12 @@ const AdminDashboard = () => {
     type: 'student'
   });
 
+  const [adminForm, setAdminForm] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
   useEffect(() => {
     fetchAllData();
   }, [activeTab]);
@@ -65,9 +77,10 @@ const AdminDashboard = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [students, instructors, centers, seminars, attendance] = await Promise.all([
+      const [students, instructors, admins, centers, seminars, attendance] = await Promise.all([
         usersAPI.getStudents(),
         usersAPI.getInstructors(),
+        usersAPI.getAdmins(),
         centersAPI.getAll(),
         seminarsAPI.getAll(),
         attendanceAPI.getAll()
@@ -76,6 +89,7 @@ const AdminDashboard = () => {
       setData({
         students: students.data,
         instructors: instructors.data,
+        admins: admins.data,
         centers: centers.data,
         seminars: seminars.data,
         attendance: attendance.data
@@ -84,6 +98,7 @@ const AdminDashboard = () => {
       setStats({
         students: students.data.length,
         instructors: instructors.data.length,
+        admins: admins.data.length,
         centers: centers.data.length,
         seminars: seminars.data.length
       });
@@ -208,6 +223,20 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleRegisterAdmin = async (e) => {
+    e.preventDefault();
+    try {
+      await authAPI.registerAdmin(adminForm);
+      setSuccess('Admin registered successfully!');
+      setShowAdminModal(false);
+      setAdminForm({ name: '', email: '', password: '' });
+      fetchAllData();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error registering admin');
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -239,6 +268,12 @@ const AdminDashboard = () => {
             <h3>Total Instructors</h3>
             <div className="count">{stats.instructors}</div>
           </div>
+          {isSuperAdmin && (
+            <div className="card">
+              <h3>Total Admins</h3>
+              <div className="count">{stats.admins}</div>
+            </div>
+          )}
           <div className="card">
             <h3>Total Centers</h3>
             <div className="count">{stats.centers}</div>
@@ -445,7 +480,48 @@ const AdminDashboard = () => {
 
         {activeTab === 'users' && (
           <div className="section">
-            <h3>Students</h3>
+            {isSuperAdmin && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3>Admins</h3>
+                  <button className="btn btn-success" onClick={() => setShowAdminModal(true)}>
+                    + Register Admin
+                  </button>
+                </div>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Super Admin</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.admins.map(admin => (
+                      <tr key={admin._id}>
+                        <td>{admin.name}</td>
+                        <td>{admin.email}</td>
+                        <td>
+                          <span style={{ 
+                            padding: '4px 8px', 
+                            borderRadius: '4px', 
+                            background: admin.isSuperAdmin ? '#dc3545' : '#6c757d',
+                            color: 'white',
+                            fontSize: '12px'
+                          }}>
+                            {admin.isSuperAdmin ? 'Yes' : 'No'}
+                          </span>
+                        </td>
+                        <td>{new Date(admin.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+
+            <h3 style={{ marginTop: isSuperAdmin ? '40px' : '0' }}>Students</h3>
             <table className="table">
               <thead>
                 <tr>
@@ -735,6 +811,58 @@ const AdminDashboard = () => {
                     type="button" 
                     className="btn btn-secondary" 
                     onClick={() => setShowAttendanceModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Registration Modal */}
+        {showAdminModal && isSuperAdmin && (
+          <div className="modal">
+            <div className="modal-content">
+              <h3>Register New Admin</h3>
+              <form onSubmit={handleRegisterAdmin}>
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={adminForm.name}
+                    onChange={(e) => setAdminForm({...adminForm, name: e.target.value})}
+                    required
+                    placeholder="Enter admin's full name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={adminForm.email}
+                    onChange={(e) => setAdminForm({...adminForm, email: e.target.value})}
+                    required
+                    placeholder="Enter admin's email"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    value={adminForm.password}
+                    onChange={(e) => setAdminForm({...adminForm, password: e.target.value})}
+                    required
+                    placeholder="Enter password (min 6 characters)"
+                    minLength="6"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button type="submit" className="btn btn-primary">Register Admin</button>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => setShowAdminModal(false)}
                   >
                     Cancel
                   </button>

@@ -28,6 +28,7 @@ api.interceptors.request.use(
 export const authAPI = {
   login: (email, password) => api.post('/auth/login', { email, password }),
   register: (userData) => api.post('/auth/register', userData),
+  registerAdmin: (adminData) => api.post('/auth/register-admin', adminData),
   getMe: () => api.get('/auth/me')
 };
 
@@ -38,7 +39,8 @@ export const usersAPI = {
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
   getStudents: () => api.get('/users/students/all'),
-  getInstructors: () => api.get('/users/instructors/all')
+  getInstructors: () => api.get('/users/instructors/all'),
+  getAdmins: () => api.get('/users/admins/all')
 };
 
 // Centers API
